@@ -10,7 +10,7 @@ vulnerability here.
 deployment.
 
 Use GitHub's private vulnerability reporting (Security → Report a
-vulnerability), or email **`SECURITY_CONTACT_TO_BE_SET`**.
+vulnerability), or email **<xampydev@gmail.com>**.
 
 Acknowledgement within 3 working days; an initial assessment within 10.
 

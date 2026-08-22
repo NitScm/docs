@@ -98,9 +98,10 @@ sudo apt install "./nit_${VERSION}_linux_amd64.deb"
 nit version
 ```
 
-The package installs all four binaries into `/usr/bin` and declares a
-dependency on `git`, so apt refuses rather than leaving you with a worker that
-fails on its first task.
+The package installs all four binaries into `/usr/bin`, the engineering
+documents into `/usr/share/doc/nit/`, and declares a dependency on `git` — so
+apt refuses rather than leaving you with a worker that fails on its first
+task.
 
 On an ARM machine — a Raspberry Pi, an AWS Graviton instance — replace `amd64`
 with `arm64`.
@@ -113,6 +114,10 @@ sudo rpm -i "https://github.com/NitScm/nit/releases/download/v${VERSION}/nit_${V
 ```
 
 ### Any Linux, or macOS
+
+Two archives, split by who runs what. `nit_…` carries **`nit` and `nitctl`** —
+the tools a person runs. `nit-server_…` carries **`nitd` and `nit-worker`**,
+plus the engineering documents.
 
 ```sh
 VERSION=0.1.0
@@ -127,6 +132,9 @@ sha256sum --check --ignore-missing checksums.txt
 tar xzf "nit_${VERSION}_${OS}_${ARCH}.tar.gz"
 sudo install -m 0755 nit nitctl /usr/local/bin/
 ```
+
+For a server, swap `nit_` for `nit-server_` — or install the `.deb` or `.rpm`
+above, which carry all four binaries and declare the dependency on git.
 
 Check the checksum before running anything. It takes one command, and it is the
 only step that distinguishes the archive you meant to download from one you

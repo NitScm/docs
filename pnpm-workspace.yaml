@@ -1,0 +1,13 @@
+# pnpm blocks dependency build scripts by default, which is the right default:
+# a postinstall script runs arbitrary code from a transitive dependency at
+# install time, on every developer machine and every CI run.
+#
+# These two genuinely need theirs — sharp fetches its native image-processing
+# binary and esbuild its platform binary — and without them the build fails at
+# the first image or the first bundle.
+#
+# Adding an entry here is a decision to run someone else's code at install time.
+# Look at what the script does first.
+allowBuilds:
+  esbuild: true
+  sharp: true

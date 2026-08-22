@@ -1,0 +1,104 @@
+---
+title: nit
+description: An authorization layer between developers and a git forge — per-file read and write control on any repository.
+template: splash
+hero:
+  tagline: |
+    Per-file read and write control on any git repository. Files a developer may
+    not read never reach their machine; changes they may not make never reach
+    the forge.
+  actions:
+    - text: What nit does
+      link: /start/what-nit-does/
+      icon: right-arrow
+    - text: Install it
+      link: /start/install/
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## The gap nit fills
+
+GitHub, GitLab and Gitea all grant access **per repository**. None of them can
+hide a file *inside* a repository from someone who can clone it.
+
+So teams split repositories until the boundaries match the permissions — and
+then live with the submodules, the version skew and the cross-repository changes
+that nobody can review in one place. Or they keep one repository and accept that
+every developer, every contractor and every CI job can read the production
+credentials in it.
+
+nit is the third option. One repository, and the permissions inside it.
+
+<CardGrid>
+	<Card title="Absent, not hidden" icon="seti:lock">
+		A file a developer may not read is not encrypted or greyed out on their
+		machine. It is **not there**. There is nothing on that disk to leak.
+	</Card>
+	<Card title="Fail-closed writes" icon="error">
+		A push touching a path its author may not write is refused **whole**, with
+		the rule that refused it and what to do about it. Not silently stripped.
+	</Card>
+	<Card title="Ordinary git" icon="seti:git">
+		Developers commit, branch and merge as usual. nit sits between them and the
+		forge; the forge itself is unchanged.
+	</Card>
+	<Card title="Answerable" icon="approve-check">
+		Every decision records who, what, when, and under which rule — against a
+		policy version you can replay.
+	</Card>
+</CardGrid>
+
+## In one minute
+
+```sh
+nit clone backend-api
+cd backend-api
+ls
+# src/  docs/          ← secrets/ is not here. Not hidden: absent.
+
+vim src/server/api.go
+git commit -am 'fix the handler'
+nit push -m 'fix the handler'
+# Pushed 1 file(s) to backend-api@main as 978464d55d39
+```
+
+And when the rules say no:
+
+```sh
+nit push -m 'update the token'
+# nit: the patch touches paths you may not change
+#
+#   secrets/prod.env (create)
+#       refused by rule secrets-are-platform-only
+#       Production secrets are owned by the platform team.
+```
+
+Nothing reached the forge.
+
+## Where to go next
+
+<CardGrid>
+	<LinkCard
+		title="What nit does"
+		href="/start/what-nit-does/"
+		description="The problem, the shape of the solution, and what nit does not do."
+	/>
+	<LinkCard
+		title="Install"
+		href="/start/install/"
+		description="A complete environment with a Gitea forge, in one command."
+	/>
+	<LinkCard
+		title="Filtered projections"
+		href="/concepts/filtered-projections/"
+		description="The one idea that explains everything else about nit."
+	/>
+	<LinkCard
+		title="Writing a policy bundle"
+		href="/guides/policy-bundles/"
+		description="Rules, groups, subtrees and exemptions — reviewed like code."
+	/>
+</CardGrid>

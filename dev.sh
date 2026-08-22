@@ -101,6 +101,14 @@ fi
 # go
 # ---------------------------------------------------------------------------
 
-echo "==> starting the dev server on http://localhost:4321"
+# The site is served under a base path, so the dev server answers on
+# http://localhost:4321/docs/ and the bare origin is a 404 — and Astro prints
+# only the origin, which sends you straight to that 404. Read the base out of
+# the config rather than repeating it here: two copies of a path eventually
+# disagree, and this one would disagree silently.
+base=$(sed -n "s/^const base = '\\(.*\\)';$/\\1/p" astro.config.mjs)
+
+echo "==> the site is at http://localhost:4321${base}/"
+echo "    (the bare origin is a 404: everything lives under ${base})"
 
 exec pnpm run dev -- "$@"

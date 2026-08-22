@@ -49,6 +49,12 @@ This document describes a set of rules and conventions maintainers use in this r
   outside the Markdown pipeline, so it uses `import.meta.env.BASE_URL` and
   relative paths.
 
+* The dev server honours the base too, so the site is at
+  **http://localhost:4321/docs/** and the bare origin is a 404 — including the
+  link Astro prints on start-up. `./dev.sh` prints the working one. Dev is kept
+  identical to production on purpose: a base that only applies to the build is
+  how 28 broken links once shipped with a green build.
+
 * Concepts explain why, guides explain how, reference is exhaustive and dull. A
   page that mixes the three serves none of them.
 

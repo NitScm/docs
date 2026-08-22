@@ -86,6 +86,14 @@ The exception is `index.mdx`: Starlight component props and YAML frontmatter are
 outside the Markdown pipeline, so its cards use `import.meta.env.BASE_URL` and
 its hero actions use relative paths. Follow what is already there.
 
+The dev server applies the base as well, so locally the site is at
+**http://localhost:4321/docs/** — the bare origin is a 404, and so is the link
+Astro prints when it starts. `./dev.sh` prints the working URL.
+
+That friction is deliberate. Dropping the base in development would remove it
+and would make development stop reflecting production, which is exactly how 28
+broken links once shipped with a passing build.
+
 ## Before you open a pull request
 
 ```sh

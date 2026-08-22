@@ -82,6 +82,123 @@ Then follow [Your first workspace](/start/first-steps/).
 docker compose down -v      # -v also removes the volumes
 ```
 
+## Released binaries
+
+Every release publishes signed-by-checksum archives and Linux packages at
+[github.com/NitScm/nit/releases](https://github.com/NitScm/nit/releases). The
+binaries are static and need no runtime beyond **git**.
+
+### Ubuntu and Debian
+
+```sh
+VERSION=0.1.0
+curl -LO "https://github.com/NitScm/nit/releases/download/v${VERSION}/nit_${VERSION}_linux_amd64.deb"
+sudo apt install "./nit_${VERSION}_linux_amd64.deb"
+
+nit version
+```
+
+The package installs all four binaries into `/usr/bin` and declares a
+dependency on `git`, so apt refuses rather than leaving you with a worker that
+fails on its first task.
+
+On an ARM machine — a Raspberry Pi, an AWS Graviton instance — replace `amd64`
+with `arm64`.
+
+### Fedora, RHEL and openSUSE
+
+```sh
+VERSION=0.1.0
+sudo rpm -i "https://github.com/NitScm/nit/releases/download/v${VERSION}/nit_${VERSION}_linux_amd64.rpm"
+```
+
+### Any Linux, or macOS
+
+```sh
+VERSION=0.1.0
+OS=linux            # or: darwin
+ARCH=amd64          # or: arm64
+
+curl -LO "https://github.com/NitScm/nit/releases/download/v${VERSION}/nit_${VERSION}_${OS}_${ARCH}.tar.gz"
+curl -LO "https://github.com/NitScm/nit/releases/download/v${VERSION}/checksums.txt"
+
+sha256sum --check --ignore-missing checksums.txt
+
+tar xzf "nit_${VERSION}_${OS}_${ARCH}.tar.gz"
+sudo install -m 0755 nit nitctl /usr/local/bin/
+```
+
+Check the checksum before running anything. It takes one command, and it is the
+only step that distinguishes the archive you meant to download from one you
+did not.
+
+### Windows
+
+Developers on Windows get `nit` and `nitctl`. Download
+`nit_<version>_windows_amd64.zip` from the releases page, or:
+
+```powershell
+$Version = '0.1.0'
+$Arch    = 'amd64'      # or: arm64 on a Surface Pro X or similar
+
+Invoke-WebRequest -Uri "https://github.com/NitScm/nit/releases/download/v$Version/nit_${Version}_windows_$Arch.zip" -OutFile nit.zip
+Invoke-WebRequest -Uri "https://github.com/NitScm/nit/releases/download/v$Version/checksums.txt" -OutFile checksums.txt
+
+# Verify before extracting.
+(Get-FileHash nit.zip -Algorithm SHA256).Hash.ToLower()
+Select-String -Path checksums.txt -Pattern "windows_$Arch.zip"
+
+Expand-Archive nit.zip -DestinationPath "$env:LOCALAPPDATA\nit"
+```
+
+Then put it on your `PATH`, for this session and the next:
+
+```powershell
+$env:Path += ";$env:LOCALAPPDATA\nit"
+[Environment]::SetEnvironmentVariable(
+    'Path',
+    [Environment]::GetEnvironmentVariable('Path', 'User') + ";$env:LOCALAPPDATA\nit",
+    'User')
+
+nit version
+```
+
+You also need **git for Windows** — nit produces and applies patches, it does
+not reimplement git.
+
+:::note[Why only two binaries on Windows]
+`nitd` and `nit-worker` are server components. They compile for Windows, but a
+worker's whole job is to clone, apply, rebase and push through a real git, and
+that path has not been exercised there. A published binary is a claim that it
+works; that claim is not made until it is tested. Run the server side on Linux
+— which is what the Compose stacks above do.
+:::
+
+### With Go
+
+If you already have Go 1.25, this is the shortest route on any platform, and
+the binary still reports its version — the toolchain stamps the module version
+and the revision even without a release build.
+
+```sh
+go install github.com/NitScm/nit/cmd/nit@latest
+go install github.com/NitScm/nit/cmd/nitctl@latest
+```
+
+### Confirming what you installed
+
+```sh
+nit version
+```
+
+```
+nit v0.1.0 (a1b2c3d4e5f6) built 2026-08-22T21:00:00Z go1.25.11 linux/amd64
+```
+
+Quote that line in a bug report. A build that cannot say which build it is
+turns every report into a guess — which is why `dev (unknown)` appears instead
+of nothing when a binary was built outside a release.
+
 ## From source
 
 You need **Go 1.25** and **git**.

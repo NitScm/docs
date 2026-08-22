@@ -1,4 +1,4 @@
-# Contributing to nit-docs
+# Contributing to the nit documentation
 
 The user documentation site: Astro + Starlight, everything in Markdown under
 `src/content/docs/`.
@@ -74,6 +74,17 @@ want.
 **Concepts explain why. Guides explain how. Reference is exhaustive and dull.**
 A page that mixes the three serves none of them. If a guide is growing an
 exhaustive table of flags, that table belongs in `reference/`.
+
+## Links and the base path
+
+The site is served from `https://nitscm.github.io/docs/`, so every URL
+carries a `/docs` prefix. **Write links without it** — `[x](/concepts/guards/)`
+— and a rehype plugin in `astro.config.mjs` adds it at build time. The base is
+declared once, in that file.
+
+The exception is `index.mdx`: Starlight component props and YAML frontmatter are
+outside the Markdown pipeline, so its cards use `import.meta.env.BASE_URL` and
+its hero actions use relative paths. Follow what is already there.
 
 ## Before you open a pull request
 

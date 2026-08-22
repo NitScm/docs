@@ -1,4 +1,4 @@
-# nit-docs
+# nit documentation
 
 The user-facing documentation site for [nit](https://github.com/NitScm/nit), built with
 [Astro](https://astro.build) and [Starlight](https://starlight.astro.build).

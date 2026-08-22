@@ -1,0 +1,68 @@
+# Build the documentation on every change; publish it when main moves.
+#
+# The build runs on pull requests too, without deploying. That is where it earns
+# its keep: a sidebar slug with no page fails the build, which is the most common
+# way to break this site, and catching it in review costs nothing.
+
+name: docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deployment half-way: a partially published site is worse than a
+# late one. Queue instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Starlight's lastUpdated reads each page's last commit date from git
+          # history. The default shallow clone has none, so every page would
+          # claim it was updated today.
+          fetch-depth: 0
+
+      # Reads the pnpm version from package.json's packageManager field, so it
+      # cannot drift from what developers run.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      # --frozen-lockfile fails rather than silently resolving a different tree
+      # when the lockfile and package.json disagree.
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    # Never from a pull request: a fork's token has no pages:write, and a PR
+    # must not be able to publish. Manual runs do deploy — that is how you
+    # republish after fixing the Pages source setting, without an empty commit.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

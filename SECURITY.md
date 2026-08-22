@@ -1,4 +1,4 @@
-# Security policy — nit-docs
+# Security policy — the nit documentation
 
 This is a static documentation site. Its own attack surface is small. Its
 capacity to cause harm is not, and that distinction shapes what we consider a

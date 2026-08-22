@@ -9,10 +9,10 @@ hero:
     the forge.
   actions:
     - text: What nit does
-      link: /start/what-nit-does/
+      link: start/what-nit-does/
       icon: right-arrow
     - text: Install it
-      link: /start/install/
+      link: start/install/
       icon: external
       variant: minimal
 ---
@@ -32,6 +32,10 @@ credentials in it.
 
 nit is the third option. One repository, and the permissions inside it.
 
+{/* The base path is applied through import.meta.env.BASE_URL rather than
+    written into the href: these are component props, so the rehype rewriter in
+    astro.config.mjs — which fixes every hand-written link in Markdown — never
+    sees them. */}
 <CardGrid>
 	<Card title="Absent, not hidden" icon="seti:lock">
 		A file a developer may not read is not encrypted or greyed out on their
@@ -83,22 +87,22 @@ Nothing reached the forge.
 <CardGrid>
 	<LinkCard
 		title="What nit does"
-		href="/start/what-nit-does/"
+		href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/start/what-nit-does/`}
 		description="The problem, the shape of the solution, and what nit does not do."
 	/>
 	<LinkCard
 		title="Install"
-		href="/start/install/"
+		href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/start/install/`}
 		description="A complete environment with a Gitea forge, in one command."
 	/>
 	<LinkCard
 		title="Filtered projections"
-		href="/concepts/filtered-projections/"
+		href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/concepts/filtered-projections/`}
 		description="The one idea that explains everything else about nit."
 	/>
 	<LinkCard
 		title="Writing a policy bundle"
-		href="/guides/policy-bundles/"
+		href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/guides/policy-bundles/`}
 		description="Rules, groups, subtrees and exemptions — reviewed like code."
 	/>
 </CardGrid>

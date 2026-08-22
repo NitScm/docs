@@ -43,6 +43,12 @@ This document describes a set of rules and conventions maintainers use in this r
   order matters: a new page needs its slug added there, and a slug with no page
   fails the build.
 
+* The site is served under `/docs`. Write links **without** that prefix —
+  `[x](/concepts/guards/)` — a rehype plugin in `astro.config.mjs` applies it at
+  build time. `index.mdx` is the exception: component props and frontmatter are
+  outside the Markdown pipeline, so it uses `import.meta.env.BASE_URL` and
+  relative paths.
+
 * Concepts explain why, guides explain how, reference is exhaustive and dull. A
   page that mixes the three serves none of them.
 

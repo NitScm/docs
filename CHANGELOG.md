@@ -1,4 +1,4 @@
-# Changelog — nit-docs
+# Changelog — the nit documentation
 
 All notable changes to the user documentation site.
 
@@ -54,6 +54,25 @@ than they were, which is the direction that costs a reader most.
   description — which is the practice the page should have been teaching anyway.
 - **Guard identifier.** `protected-path` corrected to `protected_path`.
 
+### Deployment
+
+Published to GitHub Pages at **<https://nitscm.github.io/docs/>** from
+`.github/workflows/deploy.yml`: built on every pull request, deployed when
+`main` moves. No custom domain and no DNS — GitHub provides the certificate.
+
+Served as a *project page*, so everything lives under `base: '/docs'`. That
+has one consequence worth knowing before writing a page: Starlight prefixes the
+links it generates itself — sidebar, pagination, breadcrumbs — but a link an
+author types is emitted verbatim, and would 404. Measured before it was fixed:
+28 broken links against 23 working ones, with no error at build time.
+
+A rehype plugin in `astro.config.mjs` applies the base to every root-absolute
+link in Markdown, so pages keep being written as `[x](/concepts/guards/)` and
+the base stays declared in one place. Component props and YAML frontmatter sit
+outside that pipeline, which is why `index.mdx` uses
+`import.meta.env.BASE_URL` for its cards and relative paths for its hero
+actions.
+
 ### Known gaps
 
 - Link checking is manual; the build catches a sidebar slug with no page, but
@@ -61,8 +80,6 @@ than they were, which is the direction that costs a reader most.
 - No search beyond Starlight's built-in Pagefind index.
 - No versioned documentation — the site describes `main`.
 - No translations.
-- Not yet deployed anywhere; `astro.config.mjs` points `site` at
-  `https://nitscm.github.io`.
 
 ---
 

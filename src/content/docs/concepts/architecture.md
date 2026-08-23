@@ -83,11 +83,14 @@ purpose.
 
 The audit table carries a trigger that refuses `UPDATE`, `DELETE` and
 `TRUNCATE` with an error, so an application bug cannot rewrite history — and an
-operator who tries is told rather than quietly ignored. Retention is an operational concern
-and deliberately not the application's — but note that it is currently *nobody's*:
-the table is not partitioned and nothing prunes it. See
-[Day-to-day operations](/guides/operations/#the-audit-trail) for the purge that
-works today, and `docs/SCALING.md` for why partitioning is the real answer.
+operator who tries is told rather than quietly ignored. (`TRUNCATE` is the
+exception on MySQL and MariaDB, which fire no trigger for it; there the line is
+held by withholding the `DROP` privilege.)
+
+Retention is an operator action, never the application's: `nitctl audit prune`
+is the only way to remove records, it goes to the database rather than the API,
+and it records itself in the trail it is emptying. See
+[Retention](/guides/operations/#retention).
 
 ### Patches: in a blob store
 

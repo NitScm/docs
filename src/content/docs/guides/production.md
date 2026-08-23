@@ -12,7 +12,7 @@ busy branch, and that limit is architectural rather than a matter of tuning.
 
 Read `docs/SCALING.md` in the repository before committing a monorepo where a
 large team pushes to a single trunk. It also documents the ceilings that arrive
-next, and the fact that `audit_log` currently has no retention mechanism.
+next, and how audit retention is applied.
 :::
 
 ## Before anything else: the forge
@@ -189,8 +189,8 @@ version it is serving — which is how you spot two of them disagreeing.
 - [ ] The policy repository is backed up
 - [ ] Somebody knows to check `nitctl stats` when developers say pushes are slow
 - [ ] `/healthz` is monitored
-- [ ] `audit_log` growth is monitored — nothing prunes it, and a plain `DELETE`
-      silently does nothing
+- [ ] A retention period is decided and applied — `nitctl audit prune` is the
+      only thing that removes audit records, and nothing runs it for you
 - [ ] The branches your team actually pushes to are not one shared trunk
 
 **Before opening it to developers**

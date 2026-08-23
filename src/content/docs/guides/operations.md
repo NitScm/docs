@@ -147,30 +147,59 @@ Records are append-only at the database level: a trigger refuses `UPDATE`,
 `DELETE` and `TRUNCATE` with an error, so an application bug cannot rewrite
 history.
 
-:::caution[There is no retention mechanism]
-`audit_log` is not partitioned and nothing prunes it. It grows for as long as
-the deployment runs.
+## Retention
 
-Removing old records is deliberately awkward — the trigger has to be disabled
-first, which is the point. It refuses out loud:
+`nitctl audit prune` removes records older than a cutoff. It is the only way to
+empty the table, and it goes to the database directly — there is no endpoint,
+because nothing a request can reach may delete evidence.
 
-```
-ERROR:  audit_log is append-only: DELETE is not permitted
-```
-
-```sql
-BEGIN;
-ALTER TABLE audit_log DISABLE TRIGGER audit_log_append_only;
-ALTER TABLE audit_log DISABLE TRIGGER audit_log_append_only_truncate;
-DELETE FROM audit_log WHERE occurred_at < now() - interval '2 years';
-ALTER TABLE audit_log ENABLE TRIGGER audit_log_append_only;
-ALTER TABLE audit_log ENABLE TRIGGER audit_log_append_only_truncate;
-COMMIT;
+```sh
+nitctl audit prune -keep-days 365          # reports, deletes nothing
+nitctl audit prune -keep-days 365 -yes     # deletes
 ```
 
-Do this deliberately, with the retention period your compliance obligations
-name. Partitioning is the right fix and is not implemented — see
-`docs/SCALING.md`.
+Without `-yes` it counts and stops. There is no undo, and the audit trail is the
+record that nit enforced anything.
+
+```
+cutoff:  2025-08-23T09:24:08Z
+matched: 201 record(s) older than that
+removed 201 record(s)
+```
+
+**The purge records itself.** Two rows survive it — `audit.purge_started` with
+the cutoff and the count, and `audit.purge_completed` with what was removed —
+naming whoever ran it. A purge interrupted halfway therefore leaves a `started`
+with no `completed`, which is exactly what an auditor needs to see; the
+alternative is a gap in the trail that nothing explains.
+
+**The append-only protection is restored afterwards.** On PostgreSQL the guard
+is lifted and restored inside each batch's transaction, so no other session ever
+observes it off. On MySQL and MariaDB that is not possible — dropping a trigger
+is DDL and commits immediately — so there is a window, and a purge killed inside
+it leaves the table unprotected. The next `nitctl audit prune` reports that
+loudly and closes it:
+
+```
+WARNING: the append-only protection was already absent when this started.
+a previous purge did not finish, and audit_log has accepted deletions since.
+```
+
+:::tip[Choose the cutoff from your obligations, not from disk]
+Growth is linear in activity and modest: a push writes one row plus one per
+denied path in the submitted changeset, and a pull writes two regardless of how
+many files were withheld. The reason to prune is a retention period you are
+required to honour, not usually a volume problem.
+:::
+
+:::caution[Partitioning is an option, not the default]
+`DROP PARTITION` removes rows without firing any trigger, on all three engines —
+so partitioning `audit_log` turns "deleting audit records requires deliberately
+lifting a guard" into "one `ALTER TABLE`". It makes a prune O(1), and it weakens
+what it makes manageable. On MySQL and MariaDB it also costs `audit_log` its
+four foreign keys, which those engines refuse on a partitioned table.
+
+Take it knowingly, or not at all.
 :::
 
 ## Rolling out a policy change

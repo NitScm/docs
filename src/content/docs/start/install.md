@@ -98,10 +98,9 @@ sudo apt install "./nit_${VERSION}_linux_amd64.deb"
 nit version
 ```
 
-The package installs all four binaries into `/usr/bin`, the engineering
-documents into `/usr/share/doc/nit/`, and declares a dependency on `git` — so
-apt refuses rather than leaving you with a worker that fails on its first
-task.
+The package installs all four binaries into `/usr/bin` and declares a
+dependency on `git`, so apt refuses rather than leaving you with a worker that
+fails on its first task.
 
 On an ARM machine — a Raspberry Pi, an AWS Graviton instance — replace `amd64`
 with `arm64`.
@@ -116,8 +115,11 @@ sudo rpm -i "https://github.com/NitScm/nit/releases/download/v${VERSION}/nit_${V
 ### Any Linux, or macOS
 
 Two archives, split by who runs what. `nit_…` carries **`nit` and `nitctl`** —
-the tools a person runs. `nit-server_…` carries **`nitd` and `nit-worker`**,
-plus the engineering documents.
+the tools a person runs. `nit-server_…` carries **`nitd` and `nit-worker`**.
+
+Neither carries the engineering documents from the repository's `docs/`. Those
+are written for people modifying nit, and a copy on disk drifts from this site
+and from the binary it shipped with. What you are reading is the current one.
 
 ```sh
 VERSION=0.1.0

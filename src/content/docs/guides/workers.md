@@ -123,6 +123,26 @@ nit-worker -queues=pull        # reads only
 Useful when read traffic is bursty — a hundred developers running `nit pull`
 after a release — and you do not want it competing with pushes for disk.
 
+### A release does not cost one pass per developer
+
+A worker shares a filtered projection between users whose **read rights are
+identical**. Everyone in the same groups, with the same exemptions, at the same
+ref, under the same bundle, receives the same bytes — so the first pull after a
+release does the work and the rest are served from it, diff included.
+
+The cost of a release is therefore the number of distinct rights profiles, not
+the number of developers. In most organisations that is a handful.
+
+Two things are worth knowing about it:
+
+- **The sharing is per worker.** Four workers means the work happens at most
+  four times, not once. Whether a shared cache is worth its complexity is a
+  question the audit trail answers: every pull records `reused_projection` in
+  its detail, so the hit rate is measurable rather than assumed.
+- **A policy change invalidates everything**, because the fingerprint includes
+  the bundle version. The first pull after a policy edit pays full price, which
+  is the correct behaviour and not a bug to report.
+
 ## What a worker does not do
 
 **It does not re-derive authorization for a push.** The control plane already

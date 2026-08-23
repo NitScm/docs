@@ -100,15 +100,15 @@ nitctl config show
 ```
 file: /etc/nit/nit.yaml
 
-SETTING                    FROM         VALUE
-addr                       file         127.0.0.1:8080
-database.url               file         postgres://nit:***@db:5432/nit
-forge.token                default      (not set)
-log.level                  env          DEBUG
-queue.lease_duration       file         5m0s
-queue.poll                 default      1s
-security.sync_key          file         (set)
-server.admin_groups        file         platform
+SETTING                     FROM         VALUE
+addr                        file         127.0.0.1:8080
+database.url                file         postgres://nit:***@db:5432/nit
+forge.token                 default      (not set)
+log.level                   env          DEBUG
+queue.lease_duration        file         5m0s
+queue.poll                  default      1s
+security.sync_key           file         (set)
+server.admin_groups         file         platform
 ```
 
 The **FROM** column answers "why is this setting what it is?" — the question

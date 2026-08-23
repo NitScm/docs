@@ -63,6 +63,7 @@ policy:
 storage:
   blob_dir: /var/lib/nit/blobs
   work_dir: /var/lib/nit/work
+  mirror_budget_bytes: 21474836480
   max_patch_bytes: 104857600
   pull_ttl: 24h
 
@@ -156,15 +157,21 @@ needs one `nit pull` to recover.
 | File key | Variable | Default | |
 | --- | --- | --- | --- |
 | `storage.blob_dir` | `NIT_BLOB_DIR` | `./var/blobs` | Patch payloads |
-| `storage.work_dir` | `NIT_WORK_DIR` | `./var/work` | Where workers clone |
+| `storage.work_dir` | `NIT_WORK_DIR` | `./var/work` | A worker's git mirrors and task worktrees |
+| `storage.mirror_budget_bytes` | `NIT_MIRROR_BUDGET_BYTES` | `21474836480` (20 GiB) | Disk the mirrors may occupy before the least recently used are evicted; `0` disables eviction |
 
 **`blob_dir` must be shared between `nitd` and every worker.** `nitd` writes the
 authorized patch there and the worker reads it back; two processes with two
 separate directories produce `missing_patch` on every push. On one host that
 means the same path; across hosts, a shared volume.
 
-`work_dir` is scratch, local to each worker, never backed up. Size it for the
-largest repository × concurrency: each runner holds one clone at a time.
+`work_dir` is scratch, local to each worker, never backed up, and **belongs to
+one worker process** — two workers sharing one would race on the same mirror.
+
+It holds a bare mirror per repository, kept between tasks, plus one worktree per
+concurrent task. Only the worktrees free their disk on their own, so size the
+volume as `mirror_budget_bytes` plus the largest repository × concurrency. See
+[Running workers](/guides/workers/#sizing-and-why-mirrors-are-evicted).
 
 ## Behaviour
 
@@ -296,14 +303,14 @@ nitctl config show
 ```
 file: /etc/nit/nit.yaml
 
-SETTING                    FROM         VALUE
-addr                       file         127.0.0.1:8080
-database.url               file         postgres://postgres:***@localhost:5432/nit
-log.level                  env          DEBUG
-policy.reload              default      30s
-queue.lease_duration       file         5m0s
-security.sync_key          file         (set)
-server.admin_groups        file         platform
+SETTING                     FROM         VALUE
+addr                        file         127.0.0.1:8080
+database.url                file         postgres://postgres:***@localhost:5432/nit
+log.level                   env          DEBUG
+policy.reload               default      30s
+queue.lease_duration        file         5m0s
+security.sync_key           file         (set)
+server.admin_groups         file         platform
 ```
 
 The `FROM` column is the point of the command: it answers *why is this setting

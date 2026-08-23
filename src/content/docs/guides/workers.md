@@ -24,7 +24,7 @@ signing key fail in ways that are very hard to diagnose.
 | | |
 | --- | --- |
 | `git` | The job is clone, apply, rebase, push |
-| Disk | `storage.work_dir`, sized for your largest repository × concurrency |
+| Disk | `storage.work_dir`, sized for the mirrors plus your largest repository × concurrency |
 | The shared blob store | `storage.blob_dir`, the same one `nitd` writes to |
 | Network access to the forge | And a credential for it |
 | The database | The queue lives there |
@@ -42,7 +42,8 @@ identity, not a person's. It should have write access to exactly the repositorie
 in the bundle and to nothing else. A person's token gives nit their whole
 account, and stops working the day they leave.
 
-For HTTPS remotes it is injected into the URL at clone time. For SSH remotes,
+For HTTPS remotes it is injected into the URL per fetch and per push, and never
+written to disk. For SSH remotes,
 leave it empty — the generic driver leaves `ssh://` remotes untouched precisely
 so git resolves the credential itself — and hand git its configuration:
 
@@ -62,7 +63,7 @@ and per-host keys stayed git's business. Empty leaves the inherited environment
 alone. See [the worked example](/guides/example-github-ssh/).
 
 The authenticated URL is a credential. It never appears in logs or error
-messages, which is why a clone failure reports only the branch it was cloning.
+messages, which is why a fetch failure reports only the branch it was fetching.
 
 ## Sizing the lease
 
@@ -75,7 +76,9 @@ queue:
 
 A worker holds a task under a lease with a TTL, kept alive by a heartbeat. The
 lease has to survive the longest gap the worker can go without heartbeating,
-which in practice means **it has to survive a clone**.
+which in practice means **it has to survive the initial clone of a repository**
+— the first task on a repository builds its mirror, and one whose mirror was
+evicted builds it again.
 
 **Too short** and a large repository loses its task mid-flight: the lease lapses,
 another worker claims the same task, and the first is cut off by its own fencing
@@ -84,9 +87,11 @@ check. The symptom is tasks that retry forever without ever failing.
 **Too long** and a crashed worker blocks its branch for that long, because
 nothing may claim a partition that is still leased.
 
-Start at `60s`. If your clones take minutes, raise it to comfortably exceed
-them — `5m` for a large monorepo is reasonable — and accept the matching recovery
-delay after a crash.
+Start at `60s`. Size it for the cold case, not the warm one: once a mirror
+exists a task fetches a delta in seconds, but the task that has to build the
+mirror pays for the whole repository. If that takes minutes, raise the lease to
+comfortably exceed it — `5m` for a large monorepo is reasonable — and accept the
+matching recovery delay after a crash.
 
 :::tip[How to tell]
 `nitctl tasks -state running` shows `duration` and the lease holder. If tasks
@@ -96,8 +101,8 @@ regularly show high attempt counts and keep restarting, the lease is too short.
 ## Scaling
 
 Concurrency comes from running **several runners**, not from fanning out inside
-one. Each runner holds one clone at a time, which keeps a worker's disk budget
-something an operator can predict.
+one. Each runner holds one worktree at a time, on top of the shared mirrors,
+which keeps a worker's disk something an operator can predict.
 
 ```sh
 nit-worker -concurrency=4                        # one process, four runners
@@ -135,7 +140,7 @@ bundle in force when the diff is produced, not when the request was accepted.
 **A zombie worker** — one whose lease expired but whose process is still
 running — cannot complete its task: every state transition presents a fencing
 token, and the token changed when another worker claimed it. Its context is
-cancelled, so a long clone aborts rather than pushing work nobody owns.
+cancelled, so a long fetch aborts rather than pushing work nobody owns.
 
 **A conflict** is permanent. If a patch no longer applies onto upstream, retrying
 would conflict identically, so the task fails immediately with `conflict` and the
@@ -150,15 +155,47 @@ and at worst a duplicate commit.
 
 ## Clone strategy
 
-Every task currently gets a fresh clone, removed afterwards.
+A worker keeps a **bare mirror per repository** in `storage.work_dir` and cuts a
+**detached worktree per task** from it. The mirror is fetched before each task,
+so a task pays for the delta rather than for a whole clone.
 
-A cache keyed by repository would be a large win on big repositories and is the
-obvious next optimization. It is not there yet because a cache shared between
-tasks that apply patches and rebase is also a way for one task's leftover state to
-corrupt another's — a trade not worth taking before the correctness is settled.
+Worktrees are never shared or reused. A task that dies mid-apply leaves a dirty
+one, and inheriting it would not produce a broken build — it would produce a
+wrong commit on the forge under a developer's name. Each task gets a fresh
+worktree and it is removed with `--force` afterwards, whatever state was left
+behind.
 
-Size `storage.work_dir` accordingly: largest repository × concurrency, with room
-to spare.
+No credential is written to disk. The mirror is created empty and filled by a
+fetch whose URL is passed per call, and the push targets that URL rather than a
+stored remote.
+
+### Sizing, and why mirrors are evicted
+
+A clone returned its disk when the task ended. A mirror does not — that is what
+makes it fast — so without a ceiling a worker that has seen enough repositories
+fills its volume, including with mirrors nobody has pushed to in a year.
+
+`storage.mirror_budget_bytes` caps what the mirrors may occupy, 20 GiB by
+default. Past it, the least recently used mirrors are removed until the rest
+fit. A mirror whose worktree is still in use is never among them.
+
+```yaml
+storage:
+  work_dir: /var/lib/nit/work
+  mirror_budget_bytes: 21474836480   # 20 GiB; 0 disables eviction
+```
+
+Size the volume as the budget **plus** the largest repository × concurrency:
+the budget covers mirrors, and the worktrees in flight sit on top of it.
+
+Setting the budget below the size of a single large repository is worse than
+useless — that repository is evicted after every task and cloned again on the
+next. The setting bounds a working set; it does not conjure disk.
+
+:::caution[A `work_dir` belongs to one worker process]
+Mirrors are locked per repository within a process. Two workers pointed at the
+same directory would race on the same mirror. Give each its own.
+:::
 
 ## Next
 

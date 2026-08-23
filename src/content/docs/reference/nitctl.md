@@ -44,12 +44,12 @@ nitctl config init -config ./nit.yaml -force
 ```
 file: /etc/nit/nit.yaml
 
-SETTING                    FROM         VALUE
-addr                       file         127.0.0.1:8080
-database.url               file         postgres://postgres:***@localhost:5432/nit
-log.level                  env          DEBUG
-policy.reload              default      30s
-security.sync_key          file         (set)
+SETTING                     FROM         VALUE
+addr                        file         127.0.0.1:8080
+database.url                file         postgres://postgres:***@localhost:5432/nit
+log.level                   env          DEBUG
+policy.reload               default      30s
+security.sync_key           file         (set)
 ```
 
 The `FROM` column answers *why is this setting what it is?* — the question an

@@ -183,7 +183,9 @@ version it is serving — which is how you spot two of them disagreeing.
 - [ ] `admin` is granted to somebody, or nobody can ever change CI
 
 **Operations**
-- [ ] PostgreSQL is backed up — sync points and the audit trail live there
+- [ ] The database is backed up — sync points and the audit trail live there
+- [ ] On MySQL or MariaDB: the application account has no `DROP` privilege, and
+      a backup is taken before every `nitctl migrate`
 - [ ] The policy repository is backed up
 - [ ] Somebody knows to check `nitctl stats` when developers say pushes are slow
 - [ ] `/healthz` is monitored

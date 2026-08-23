@@ -98,9 +98,58 @@ in ways that are very hard to diagnose.
 
 | File key | Variable | |
 | --- | --- | --- |
-| `database.url` | `NIT_DATABASE_URL` | PostgreSQL DSN |
+| `database.url` | `NIT_DATABASE_URL` | Database DSN — see [Which database](#which-database) |
 | `security.sync_key` | `NIT_SYNC_KEY` | Sync token signing key, **32 bytes minimum** |
 | `policy.dir` | `NIT_POLICY_DIR` | Directory holding the policy bundle |
+
+#### Which database
+
+The DSN selects the engine. There is no setting that names it, and one that
+matches neither shape is refused at start-up rather than guessed at.
+
+| Engine | DSN shape |
+| --- | --- |
+| PostgreSQL 13+ | `postgres://nit:secret@db:5432/nit?sslmode=require` |
+| MySQL 8.0.16+ | `nit:secret@tcp(db:3306)/nit?tls=true` |
+| MariaDB 10.6+ | `nit:secret@tcp(db:3306)/nit?tls=true` |
+
+MySQL and MariaDB share one driver and one schema; nothing distinguishes them
+in configuration.
+
+Everything the application does behaves identically across the three — not as a
+statement of intent, but because one conformance suite runs against all of them
+in CI.
+
+:::tip[PostgreSQL is the recommended backend]
+Three differences, none of which affect what nit does:
+
+- **Migrations roll back.** On MySQL and MariaDB, DDL commits implicitly at
+  every statement, so a migration that fails halfway leaves a partial schema.
+  **Back up before migrating those two.**
+- **The audit trail cannot be truncated.** PostgreSQL refuses `TRUNCATE` on
+  `audit_log` with a trigger. Neither of the others fires a trigger for
+  `TRUNCATE`, so there the guarantee rests on withholding the `DROP` privilege.
+  `UPDATE` and `DELETE` are refused on all three.
+- **Dispatch indexes are partial**, covering queued tasks rather than every
+  task ever created.
+:::
+
+##### The grant MySQL and MariaDB need
+
+`TRUNCATE` requires `DROP`. Withholding it is what stops the audit trail being
+erased in one word:
+
+```sql
+CREATE USER 'nit'@'%' IDENTIFIED BY 'secret';
+GRANT SELECT, INSERT, UPDATE, DELETE ON nit.* TO 'nit'@'%';
+```
+
+Migrations need more, and are run by a different account on purpose — a
+deployment step an operator takes, never something the server does to itself:
+
+```sql
+GRANT ALL PRIVILEGES ON nit.* TO 'nit_migrate'@'%';
+```
 
 ### Secrets
 

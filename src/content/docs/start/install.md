@@ -231,8 +231,10 @@ Four binaries come out:
 | `nit-worker` | Anywhere with git, disk and access to the forge |
 | `nitctl` | An operator's machine, or the server |
 
-To bring up a server you also need PostgreSQL 13+ and a policy bundle. The
-shortest path:
+To bring up a server you also need a database and a policy bundle. PostgreSQL
+13+ is recommended; MySQL 8.0.16+ and MariaDB 10.6+ are supported too, and
+[Configuration](/reference/configuration/#which-database) covers what differs.
+The shortest path:
 
 ```sh
 createdb nit

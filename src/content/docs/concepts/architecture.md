@@ -81,8 +81,9 @@ purpose.
 | `audit_log` | Append-only, enforced by the database |
 | `users`, `repositories` | Mirrors of the bundle, so records have something to reference |
 
-The audit table carries `DO INSTEAD NOTHING` rules against `UPDATE` and `DELETE`,
-so an application bug cannot rewrite history. Retention is an operational concern
+The audit table carries a trigger that refuses `UPDATE`, `DELETE` and
+`TRUNCATE` with an error, so an application bug cannot rewrite history — and an
+operator who tries is told rather than quietly ignored. Retention is an operational concern
 and deliberately not the application's — but note that it is currently *nobody's*:
 the table is not partitioned and nothing prunes it. See
 [Day-to-day operations](/guides/operations/#the-audit-trail) for the purge that

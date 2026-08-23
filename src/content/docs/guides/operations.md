@@ -143,22 +143,28 @@ git log --format='%h %an %(trailers:key=Nit-Dropped,valueonly)' | grep -v ' $'
 Nit trailers cannot be forged from a commit message — the worker strips any
 `Nit-…:` line an author wrote before appending the real ones.
 
-Records are append-only at the database level — `DO INSTEAD NOTHING` rules block
-`UPDATE` and `DELETE` — so an application bug cannot rewrite history.
+Records are append-only at the database level: a trigger refuses `UPDATE`,
+`DELETE` and `TRUNCATE` with an error, so an application bug cannot rewrite
+history.
 
-:::caution[There is no retention mechanism, and deleting fails silently]
+:::caution[There is no retention mechanism]
 `audit_log` is not partitioned and nothing prunes it. It grows for as long as
 the deployment runs.
 
-Worse, the rule that protects it is **silent**: a purge reports `DELETE 0` and
-succeeds, so an operator is told it worked and nothing happened. Removing old
-records today means dropping the rule, deleting, and recreating it:
+Removing old records is deliberately awkward — the trigger has to be disabled
+first, which is the point. It refuses out loud:
+
+```
+ERROR:  audit_log is append-only: DELETE is not permitted
+```
 
 ```sql
 BEGIN;
-DROP RULE audit_log_no_delete ON audit_log;
+ALTER TABLE audit_log DISABLE TRIGGER audit_log_append_only;
+ALTER TABLE audit_log DISABLE TRIGGER audit_log_append_only_truncate;
 DELETE FROM audit_log WHERE occurred_at < now() - interval '2 years';
-CREATE RULE audit_log_no_delete AS ON DELETE TO audit_log DO INSTEAD NOTHING;
+ALTER TABLE audit_log ENABLE TRIGGER audit_log_append_only;
+ALTER TABLE audit_log ENABLE TRIGGER audit_log_append_only_truncate;
 COMMIT;
 ```
 

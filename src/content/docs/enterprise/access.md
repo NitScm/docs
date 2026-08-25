@@ -62,6 +62,61 @@ The last owner cannot leave or be demoted. An account with no owner has nobody
 who can invite one, and the only way back would be us reaching into the
 database — a position you should never be put in.
 
+## Signing in with your own directory
+
+If your company already has one — Entra ID, Okta, Ping, Google Workspace, an
+Active Directory — your people can sign in with it instead of holding another
+password.
+
+Tell us your issuer, the client id you registered for us, and which email
+domains it answers for. From then on, everybody at those domains signs in
+through your directory.
+
+### What that changes for you
+
+**One place to switch somebody off.** Disable an account in your directory and
+they stop being able to sign in here, immediately. There is no local password
+that keeps working, because a federated account has none — it is closed, not
+merely empty. That is the point of buying single sign-on, and a quiet fallback
+would defeat it.
+
+**No secret of yours sits in our database.** We register as a *public client*
+with PKCE, so there is no client secret to give us and nothing in our tables
+that could be used against your directory. It is the same rule as your signing
+key: we hold only the half that cannot be used to act as you.
+
+**Nothing you send us grants anybody anything.** Your directory tells us who
+somebody is. It does not tell us what they may do here.
+
+### The part that surprises people, and why it is deliberate
+
+Roles are not read from your groups.
+
+Most services will happily map a group called `vault-owners` onto the owner role.
+It is convenient, and it means a group renamed by an administrator who has never
+heard of this product can silently hand somebody the power to change your
+retention policy and lift a legal hold.
+
+So the role stays here, granted by invitation, changed on the Access screen by
+one of your owners. What you get in exchange is that we can tell you who granted
+what and when — which is difficult to say about a permission that arrived from
+somewhere else.
+
+The thing you actually wanted from group mapping still works: switch somebody
+off in your directory and they are out, whatever their role here says.
+
+### What we will refuse
+
+- **An address outside the domains you gave us.** Your directory speaks for your
+  people, not for anybody else's.
+- **An address your directory says is unverified.** That is how somebody claims
+  a colleague's.
+- **Somebody nobody invited.** They get no access rather than a default one.
+- **Somebody who already has an account here that your directory does not fully
+  cover** — an outside auditor, for instance, who reads two customers' trails.
+  We will not hand one company's directory control of another company's access.
+  That case is resolved on purpose rather than automatically.
+
 ## Read tokens
 
 For a script, a SIEM forwarder, an export job.

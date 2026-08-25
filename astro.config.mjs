@@ -113,6 +113,25 @@ export default defineConfig({
 					],
 				},
 				{
+					// The commercial edition, in the same site as everything else.
+					//
+					// A separate one would leak the open-core line page by page: it
+					// would be a catalogue of what the free edition does not do.
+					// Here each piece sits next to the thing it extends, and a
+					// reader who is not buying can see what it is instead of
+					// wondering.
+					label: 'Enterprise',
+					items: [
+						{ label: 'What it is for', slug: 'enterprise' },
+						{ label: 'The audit vault', slug: 'enterprise/audit-vault' },
+						{ label: 'Checking it yourself', slug: 'enterprise/checking-it-yourself' },
+						{ label: 'Retention and legal hold', slug: 'enterprise/retention' },
+						{ label: 'People and access', slug: 'enterprise/access' },
+						{ label: 'Running it at scale', slug: 'enterprise/at-scale' },
+						{ label: 'Trying the whole thing', slug: 'enterprise/try-it' },
+					],
+				},
+				{
 					label: 'Reference',
 					items: [
 						{ label: 'nit — the developer CLI', slug: 'reference/nit' },

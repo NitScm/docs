@@ -166,6 +166,39 @@ validate`, `test` and `diff` run on a laptop and in a pull request with no
 directory credential, and what they validate is the floor of what the bundle
 permits, never the ceiling.
 
+### If your directory is LDAP or Active Directory
+
+It reads them directly. You do not need to put an identity provider in front of
+your AD in order for us to read a group out of it.
+
+You give us the URL, a read-only service account, and the groups to read. On
+Active Directory that is all: the attribute names and the way AD marks an
+account disabled both come with it.
+
+**On OpenLDAP and its relatives, one more answer is required, and we will not
+start without it.** LDAP has no agreed way to say "this account is switched
+off". Active Directory has a bit in `userAccountControl`; RFC 2307 has nothing;
+OpenLDAP deployments use `pwdAccountLockedTime`, `nsAccountLock` or
+`shadowExpire` depending on who set them up. So you tell us which — or you tell
+us, in as many words, that your directory has no such state and that leavers are
+removed from their groups instead.
+
+Both are true of real deployments. What we will not do is guess, because
+guessing wrong is silent: every group would still be populated, and everybody
+you had switched off would keep their access until somebody happened to check.
+The start-up log says which of the two answers your deployment gave, since that
+is the only place the mistake is visible.
+
+**There is no "flavour" setting.** Every attribute name is a setting of its own,
+and the two starting points we ship — Active Directory and RFC 2307 — fill them
+in rather than hide them. When somebody's access is wrong, the question is which
+attribute was read, and your configuration should be able to answer it without
+anybody reading our source.
+
+**Nested groups work.** A group that contains a group is resolved by us rather
+than by your server, because the query that would do it server-side is Active
+Directory's and OpenLDAP has never heard of it.
+
 ## Read tokens
 
 For a script, a SIEM forwarder, an export job.

@@ -189,8 +189,8 @@ Five hundred people in one file is a merge-conflict hotspot and a queue at the
 door of whoever owns it.
 
 The [enterprise edition](/enterprise/access/) takes group membership from the
-directory your company already runs — Okta, Entra, Active Directory — while the
-**rules stay in git**. That split is deliberate: a directory has no review, no
+directory your company already runs — Okta, Entra, Active Directory, LDAP —
+while the **rules stay in git**. That split is deliberate: a directory has no review, no
 history and no rollback, and an authorization rule that changes without all three
 is the thing nit exists to replace.
 

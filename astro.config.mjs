@@ -103,6 +103,7 @@ export default defineConfig({
 					label: 'Guides',
 					items: [
 						{ label: 'Writing a policy bundle', slug: 'guides/policy-bundles' },
+						{ label: 'Policy for a large organisation', slug: 'guides/policy-at-scale' },
 						{ label: 'Configuring the server', slug: 'guides/server' },
 						{ label: 'Running workers', slug: 'guides/workers' },
 						{ label: 'Connecting a forge', slug: 'guides/forges' },

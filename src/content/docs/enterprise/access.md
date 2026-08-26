@@ -117,6 +117,55 @@ off in your directory and they are out, whatever their role here says.
   We will not hand one company's directory control of another company's access.
   That case is resolved on purpose rather than automatically.
 
+## Group membership from your directory
+
+The section above is about *signing in*. This one is a different thing that uses
+the same directory: your deployment reading **who is in a team**, so that a rule
+can say "the payments team owns `src/billing`" without anybody maintaining a
+list of five hundred names.
+
+You name the groups you want read, and only those. A directory serves your whole
+company; a bundle refers to a handful, and reading the rest would be collecting
+people's names for no reason.
+
+In the bundle they arrive under a prefix of their own:
+
+```yaml
+- id: payments
+  description: The payments team
+  includes: [idp:payments]     # membership from your directory
+  members: [break-glass]       # and one named here, deliberately
+```
+
+**A group in your directory cannot take over a group your rules name.** The
+rules reference `payments`, the name in the reviewed file. `idp:` is a namespace
+no file in the bundle may write into, and nothing else is matched by name. So
+somebody creating a group called `payments` in your directory grants themselves
+nothing — which matters, because the people who administer your directory are
+usually not the people who review your policy.
+
+**Removing somebody works, which is the thing you are buying.** Take them out of
+the group and they lose the access within the refresh interval, with no pull
+request involved. Somebody disabled in your directory is dropped whether or not
+anyone remembered to remove them from the group.
+
+**A group that disappears becomes empty, not an outage.** If your directory
+renames a group, or is unreachable when your deployment restarts, the include
+resolves to nobody: whoever is named directly still has their access, everybody
+else loses theirs, and it is logged. The alternative — refusing to serve — trades
+a narrowing for an outage.
+
+**It is one credential, and it is read-only.** Unlike signing in, this is a
+background job with nobody present to authorise it, so it authenticates with a
+service account. That account can read who is in a group. It cannot create a
+person or change one.
+
+**Your CI does not need any of this.** A bundle that names `idp:` groups
+compiles without a directory — those groups are simply empty. `nitctl policy
+validate`, `test` and `diff` run on a laptop and in a pull request with no
+directory credential, and what they validate is the floor of what the bundle
+permits, never the ceiling.
+
 ## Read tokens
 
 For a script, a SIEM forwarder, an export job.

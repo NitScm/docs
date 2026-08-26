@@ -194,6 +194,30 @@ directory your company already runs — Okta, Entra, Active Directory — while 
 history and no rollback, and an authorization rule that changes without all three
 is the thing nit exists to replace.
 
+In the bundle it is one line, and the group id carries an `idp:` prefix:
+
+```yaml
+- id: payments
+  description: The payments team
+  includes: [idp:payments]     # membership from the directory
+  members: [break-glass]       # and one named here, deliberately
+```
+
+Two things about that prefix are worth knowing before you write it.
+
+**The directory cannot reach a group your rules name.** `idp:` is a namespace no
+file in the bundle may write into, and the rules reference `payments` — the name
+in the reviewed file. Somebody creating a group called `payments` in the
+directory grants themselves nothing. Whoever administers your directory is
+usually not the set of people who review this bundle, and this is what keeps
+those two jobs apart.
+
+**A bundle that names a directory does not require one.** With nothing to supply
+it, `idp:payments` compiles to an empty group. That is what lets the three CI
+commands below run without a directory credential — which they should not have.
+An empty group grants nobody anything, so what CI validates is the floor of what
+the bundle permits, never the ceiling.
+
 ## What this looks like in CI
 
 ```bash

@@ -1,0 +1,71 @@
+---
+/*
+ * Dark by default, and "auto" still means auto.
+ *
+ * A fork of Starlight's own ThemeProvider — @astrojs/starlight 0.41.7 — with
+ * one expression changed. It is vendored rather than wrapped because the
+ * script has to be inlined in <head> to avoid a flash of the wrong theme, and
+ * ThemeSelect depends on the global it defines. Re-read the upstream component
+ * after a Starlight upgrade; there is nothing here that would tell you it had
+ * drifted.
+ *
+ * The distinction the upstream version does not need to make: localStorage
+ * holds `null` when the reader has never chosen, and the empty string when
+ * they chose "auto". Both are falsy, so treating them the same would have made
+ * the picker's "auto" option follow nothing at all.
+ *
+ *   null   never chose      -> dark, because this is a dark-first product
+ *   ''     chose auto       -> whatever the operating system says
+ *   light  chose light      -> light
+ *   dark   chose dark       -> dark
+ *
+ * Without JavaScript no data-theme attribute is set at all, and the palette in
+ * src/styles/theme.css is dark on bare :root — so the no-JS reader gets the
+ * same answer as the first-visit reader.
+ */
+import { Icon } from '@astrojs/starlight/components';
+---
+
+{/* Intentionally inlined: a non-inline script here is a flash of the wrong theme. */}
+<script is:inline>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' ? localStorage.getItem('starlight-theme') : null;
+
+		const preferred = () =>
+			window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+
+		const theme =
+			storedTheme === 'light' || storedTheme === 'dark'
+				? storedTheme
+				: storedTheme === ''
+					? preferred()
+					: 'dark';
+
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script>
+
+<template id="theme-icons">
+	<Icon name="sun" class="light" />
+	<Icon name="moon" class="dark" />
+	<Icon name="laptop" class="auto" />
+</template>

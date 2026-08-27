@@ -68,6 +68,10 @@ export default defineConfig({
 			// The site's palette and type, so the three surfaces a reader
 			// crosses are the same product rather than three that share a name.
 			customCss: ['./src/styles/theme.css'],
+
+			// Dark unless the reader has said otherwise. See the component for
+			// why it is a fork rather than a wrapper, and how "auto" stays honest.
+			components: { ThemeProvider: './src/components/ThemeProvider.astro' },
 			description:
 				'An authorization layer between developers and a git forge. Per-file read and write control, on any repository.',
 

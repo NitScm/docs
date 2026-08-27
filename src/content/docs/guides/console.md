@@ -26,7 +26,7 @@ docker build -t nit-console:local nit-console
 docker run -p 8090:80 -e NIT_API_URL=http://nitd:8080 nit-console:local
 ```
 
-nginx proxies `/v1`, `/healthz` and `/openapi.yaml` to `NIT_API_URL`, so the
+nginx proxies `/v1` and `/healthz` to `NIT_API_URL`, so the
 console and the API share an origin. Two consequences, both good:
 
 - the sign-in screen's **Server** field can be left empty;

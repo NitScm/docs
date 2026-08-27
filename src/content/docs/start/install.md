@@ -6,7 +6,7 @@ sidebar:
 ---
 
 The fastest way to see nit working is the development stack: PostgreSQL, a Gitea
-acting as the forge, the control plane, a worker, the web console and Swagger UI
+acting as the forge, the control plane, a worker and the web console
 — with a seeded repository and three accounts whose access deliberately differs.
 
 ## The development stack
@@ -34,7 +34,6 @@ When it finishes:
 | --- | --- |
 | Web console | http://localhost:4200 |
 | API | http://localhost:8080 |
-| Swagger UI | http://localhost:8081 |
 | Gitea | http://localhost:3000 — `nit-admin` / `nit-admin-password` |
 
 ### The three accounts

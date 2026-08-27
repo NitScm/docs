@@ -1,25 +1,34 @@
 ---
 title: The HTTP API
-description: Endpoints, authentication, and the OpenAPI description the server serves about itself.
+description: Endpoints, authentication, and the route list the server declares about itself.
 sidebar:
   order: 4
 ---
 
-Every deployment serves its own machine-readable description:
+Every route this API serves is declared in the source, publicly, as
+`protocol.Routes()`:
 
-```sh
-curl https://nit.example.com/openapi.yaml
+```go
+import "github.com/NitScm/nit/pkg/protocol"
+
+for _, route := range protocol.Routes() {
+    fmt.Println(route) // "GET /v1/whoami", "POST /v1/push", …
+}
 ```
 
-That is an OpenAPI 3.0.3 document, embedded in the binary and served
-unauthenticated. Point Swagger UI, Redoc or a client generator at it. It is the
-authority; this page is the orientation.
+A client, a proxy or a load-balancer rule can enumerate the API from that
+without parsing anything.
 
 :::tip[It cannot drift]
-A test walks every route the server registers and fails if the spec does not
-describe it, and walks every path in the spec and fails if no route serves it.
-A documented API that has quietly stopped matching the server is worse than none.
+A test asserts that what the server registers is exactly that list — a route
+served and not declared fails, and a route declared and not served fails too.
+An API description that has quietly stopped matching the server is worse than
+none, because it is believed.
 :::
+
+An OpenAPI 3.0.3 document describing these routes is published with the audit
+vault, which serves it alongside its own and holds it against `protocol.Routes()`
+with the same test. This page is the orientation; the source is the authority.
 
 ## Two surfaces
 
@@ -37,7 +46,7 @@ everyone else gets **404**, not 403.
 Authorization: Bearer nit_…
 ```
 
-Every endpoint except `/healthz` and `/openapi.yaml`. Tokens are issued with
+Every endpoint except `/healthz`. Tokens are issued with
 [`nitctl token create`](/reference/nitctl/#nitctl-token) and stored only as
 SHA-256.
 
@@ -75,7 +84,6 @@ See [Error codes](/reference/errors/) for the full list.
 | | |
 | --- | --- |
 | `GET /healthz` | Liveness. Unauthenticated — a load balancer has no token. Reports the protocol version and the policy version in force. |
-| `GET /openapi.yaml` | This description. Unauthenticated. |
 | `GET /v1/whoami` | The authenticated identity: user, email, groups, policy version. |
 | `GET /v1/repositories` | Repositories the caller can read something in. |
 | `GET /v1/workspaces` | The caller's workspaces. |
@@ -196,12 +204,11 @@ curl -s -H "Authorization: Bearer $NIT_TOKEN" localhost:8080/v1/whoami | jq
 curl -s -H "Authorization: Bearer $NIT_TOKEN" localhost:8080/v1/admin/stats | jq
 ```
 
-To browse it:
+To enumerate it:
 
-```sh
-docker run --rm -p 8081:8080 \
-  -e SWAGGER_JSON_URL=http://localhost:8080/openapi.yaml \
-  swaggerapi/swagger-ui
+```go
+// Every route, from the module itself.
+protocol.Routes()
 ```
 
 ## Next

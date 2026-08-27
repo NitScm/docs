@@ -1,0 +1,195 @@
+/*
+ * The site's palette, mapped onto Starlight's tokens.
+ *
+ * The values are copied from nit-site/src/styles/site.css rather than
+ * re-derived, so the three surfaces a reader crosses — the marketing site, the
+ * documentation, the runbook — are the same product rather than three that
+ * happen to share a name. If a colour changes there, change it here; there is
+ * no build step keeping them equal, and pretending otherwise would be worse
+ * than saying so.
+ *
+ * Starlight's convention is the reverse of the site's: it defines dark in
+ * :root and light under [data-theme='light']. Both are written out in full
+ * rather than one deriving from the other, because a half-defined theme
+ * renders one scheme's text on the other's ground.
+ */
+
+/* --------------------------------------------------------------- dark -- */
+
+:root {
+  --paper: #0d1113;
+  --surface: #141a1d;
+  --sunken: #10161a;
+  --ink: #e9e7e1;
+  --ink-2: #b3bac1;
+  --ink-3: #8a939c;
+  --edge: #242c31;
+  --edge-strong: #354048;
+  --brand: #5fcfb4;
+  --allow: #4fc9ac;
+  --deny: #e8836f;
+  --evidence: #d9a94e;
+
+  --sl-color-accent-low: #0a3a31;
+  --sl-color-accent: #14806a;
+  --sl-color-accent-high: #9fe3ce;
+
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: #eceef2;
+  --sl-color-gray-2: #c8ccd4;
+  --sl-color-gray-3: #8a939c;
+  --sl-color-gray-4: #4d565e;
+  --sl-color-gray-5: #2b343a;
+  --sl-color-gray-6: #1a2126;
+  --sl-color-black: #0d1113;
+
+  --sl-color-text: #e9e7e1;
+  --sl-color-text-accent: #5fcfb4;
+  --sl-color-bg: #0d1113;
+  --sl-color-bg-nav: #10161a;
+  --sl-color-bg-sidebar: #10161a;
+  --sl-color-bg-inline-code: #1a2126;
+  --sl-color-hairline: #242c31;
+  --sl-color-hairline-light: #2b343a;
+  --sl-color-hairline-shade: #10161a;
+
+  --sl-color-backdrop-overlay: rgba(6, 9, 10, 0.66);
+
+  --sl-font: 'Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --sl-font-mono: 'Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* -------------------------------------------------------------- light -- */
+
+:root[data-theme='light'] {
+  --paper: #fbfaf7;
+  --surface: #ffffff;
+  --sunken: #f1eee7;
+  --ink: #14181b;
+  --ink-2: #454d55;
+  --ink-3: #5e6873;
+  --edge: #e3dfd5;
+  --edge-strong: #cec8ba;
+  --brand: #0e5c4e;
+  --allow: #0f6e59;
+  --deny: #a5372a;
+  --evidence: #8a5b0b;
+
+  --sl-color-accent-low: #d5eee6;
+  --sl-color-accent: #0e5c4e;
+  --sl-color-accent-high: #06342b;
+
+  --sl-color-white: #14181b;
+  --sl-color-gray-1: #1c2226;
+  --sl-color-gray-2: #454d55;
+  --sl-color-gray-3: #5e6873;
+  --sl-color-gray-4: #8b9099;
+  --sl-color-gray-5: #cec8ba;
+  --sl-color-gray-6: #e3dfd5;
+  --sl-color-gray-7: #f1eee7;
+  --sl-color-black: #fbfaf7;
+
+  --sl-color-text: #14181b;
+  --sl-color-text-accent: #0e5c4e;
+  --sl-color-bg: #fbfaf7;
+  --sl-color-bg-nav: #f1eee7;
+  --sl-color-bg-sidebar: #f1eee7;
+  --sl-color-bg-inline-code: #f1eee7;
+  --sl-color-hairline: #e3dfd5;
+  --sl-color-hairline-light: #ebe7de;
+  --sl-color-hairline-shade: #cec8ba;
+
+  --sl-color-backdrop-overlay: rgba(20, 24, 27, 0.5);
+}
+
+/* ---------------------------------------------------------------- type -- */
+
+/*
+ * IBM Plex, SIL OFL 1.1, self-hosted. Six files, the same six the site
+ * carries. Nothing is fetched from a font host at build or at run time — see
+ * the site's colophon for why that matters on a product sold on not being able
+ * to read what a customer keeps.
+ */
+
+@font-face {
+  font-family: 'Plex Sans';
+  src: url('/fonts/plex-sans-var.woff2') format('woff2-variations');
+  font-weight: 100 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plex Sans';
+  src: url('/fonts/plex-sans-400-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plex Serif';
+  src: url('/fonts/plex-serif-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plex Serif';
+  src: url('/fonts/plex-serif-600.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plex Mono';
+  src: url('/fonts/plex-mono-400.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Plex Mono';
+  src: url('/fonts/plex-mono-500.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* -------------------------------------------------------------- detail -- */
+
+/* The site's hairline rhythm: a rule under a heading, not a heavier weight. */
+.content-panel + .content-panel {
+  border-top-color: var(--sl-color-hairline);
+}
+
+/*
+ * Semantic colour, and only semantic colour. Green and red mean allow and deny
+ * on the site and mean the same here; nothing decorative may borrow them.
+ */
+.sl-markdown-content ins,
+.sl-markdown-content .allow {
+  color: var(--allow);
+  text-decoration: none;
+}
+
+.sl-markdown-content del,
+.sl-markdown-content .deny {
+  color: var(--deny);
+}
+
+/* Code blocks sit on the sunken surface, as the site's do. */
+.sl-markdown-content :not(pre) > code {
+  border: 1px solid var(--sl-color-hairline);
+  border-radius: 4px;
+}
+
+/* A visible focus ring, in the accent rather than the browser default. */
+:where(a, button, input, select, summary):focus-visible {
+  outline: 2px solid var(--sl-color-text-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}

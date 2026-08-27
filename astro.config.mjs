@@ -65,6 +65,9 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'nit',
+			// The site's palette and type, so the three surfaces a reader
+			// crosses are the same product rather than three that share a name.
+			customCss: ['./src/styles/theme.css'],
 			description:
 				'An authorization layer between developers and a git forge. Per-file read and write control, on any repository.',
 

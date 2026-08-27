@@ -136,7 +136,7 @@ export default defineConfig({
 						{ label: 'Retention and legal hold', slug: 'enterprise/retention' },
 						{ label: 'People and access', slug: 'enterprise/access' },
 						{ label: 'Running it at scale', slug: 'enterprise/at-scale' },
-						{ label: 'Trying the whole thing', slug: 'enterprise/try-it' },
+						{ label: 'Seeing it work', slug: 'enterprise/try-it' },
 					],
 				},
 				{

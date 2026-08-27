@@ -8,7 +8,9 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "private": "node scripts/check-private.mjs",
+    "verify": "pnpm build && node scripts/check-private.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.5",

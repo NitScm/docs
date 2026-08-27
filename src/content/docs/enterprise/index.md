@@ -76,4 +76,4 @@ record of its decisions somewhere you cannot reach.
 | [Retention and legal hold](/enterprise/retention/) | How long records are kept, and stopping deletion |
 | [People and access](/enterprise/access/) | Roles, invitations, and credentials for machines |
 | [Running it at scale](/enterprise/at-scale/) | Object storage, shared caches, your directory |
-| [Trying the whole thing](/enterprise/try-it/) | The full stack on one machine, in one command |
+| [Seeing it work](/enterprise/try-it/) | A demonstration environment, and what you can run yourself today |
